@@ -64,16 +64,47 @@ class AdvertController extends Controller
     }
 
     public function viewAction($id)
+
     {
-        // Ici, on récupérera l'annonce correspondante à l'id $id
+
+        $advert = array(
+
+            'title'   => 'Recherche développpeur Symfony2',
+
+            'id'      => $id,
+
+            'author'  => 'Alexandre',
+
+            'content' => 'Nous recherchons un développeur Symfony2 débutant sur Lyon. Blabla…',
+
+            'date'    => new \Datetime()
+
+        );
+
 
         return $this->render('OCPlatformBundle:Advert:view.html.twig', array(
-            'id' => $id
+
+            'advert' => $advert
+
         ));
+
     }
 
     public function addAction(Request $request)
     {
+        $antispam = $this->container->get('oc_platform.antispam');
+
+
+        // Je pars du principe que $text contient le texte d'un message quelconque
+
+        $text = 'azertyuiughjkddfyybyguhhjh bb b iuyg ytfygfuytfgutjfgggtfyttfyft t  t fyghgvjyh fygvjhgfvjhgbvh,gbvjh,gvk'; // + 50 caractéres
+
+        if ($antispam->isSpam($text)) {
+
+            throw new \Exception('Votre message a été détecté comme spam !');
+
+        }
+
         // La gestion d'un formulaire est particulière, mais l'idée est la suivante :
 
         // Si la requête est en POST, c'est que le visiteur a soumis le formulaire
