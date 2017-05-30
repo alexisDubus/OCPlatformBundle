@@ -8,6 +8,8 @@ namespace OC\PlatformBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use OC\PlatformBundle\Entity\Advert;
+use OC\PlatformBundle\Entity\Image;
 
 class AdvertController extends Controller
 {
@@ -16,26 +18,15 @@ class AdvertController extends Controller
         // ...
 
         // Notre liste d'annonce en dur
-        $listAdverts = array(
-            array(
-                'title'   => 'Recherche développpeur Symfony',
-                'id'      => 1,
-                'author'  => 'Alexandre',
-                'content' => 'Nous recherchons un développeur Symfony débutant sur Lyon. Blabla…',
-                'date'    => new \Datetime()),
-            array(
-                'title'   => 'Mission de webmaster',
-                'id'      => 2,
-                'author'  => 'Hugo',
-                'content' => 'Nous recherchons un webmaster capable de maintenir notre site internet. Blabla…',
-                'date'    => new \Datetime()),
-            array(
-                'title'   => 'Offre de stage webdesigner',
-                'id'      => 3,
-                'author'  => 'Mathieu',
-                'content' => 'Nous proposons un poste pour webdesigner. Blabla…',
-                'date'    => new \Datetime())
-        );
+        $repository = $this
+            ->getDoctrine()
+            ->getManager()
+            ->getRepository('OCPlatformBundle:Advert')
+        ;
+
+
+        $listAdverts = $repository->findAll();
+
 
         // Et modifiez le 2nd argument pour injecter notre liste
         return $this->render('OCPlatformBundle:Advert:index.html.twig', array(
@@ -45,14 +36,14 @@ class AdvertController extends Controller
 
     public function menuAction()
     {
-        // On fixe en dur une liste ici, bien entendu par la suite
-        // on la récupérera depuis la BDD !
+        $repository = $this
+            ->getDoctrine()
+            ->getManager()
+            ->getRepository('OCPlatformBundle:Advert')
+        ;
 
-        $listAdverts = array(
-            array('id' => 2, 'title' => 'Recherche développeur Symfony'),
-            array('id' => 5, 'title' => 'Mission de webmaster'),
-            array('id' => 9, 'title' => 'Offre de stage webdesigner')
-        );
+
+        $listAdverts = $repository->findAll();
 
         return $this->render('OCPlatformBundle:Advert:menu.html.twig', array(
             // Tout l'intérêt est ici : le contrôleur passe
@@ -64,30 +55,27 @@ class AdvertController extends Controller
     }
 
     public function viewAction($id)
-
     {
+        // On récupère le repository
+        $repository = $this->getDoctrine()
+            ->getManager()
+            ->getRepository('OCPlatformBundle:Advert')
+        ;
 
-        $advert = array(
+        // On récupère l'entité correspondante à l'id $id
 
-            'title'   => 'Recherche développpeur Symfony2',
+        $advert = $repository->find($id);
 
-            'id'      => $id,
-
-            'author'  => 'Alexandre',
-
-            'content' => 'Nous recherchons un développeur Symfony2 débutant sur Lyon. Blabla…',
-
-            'date'    => new \Datetime()
-
-        );
-
+        // $advert est donc une instance de OC\PlatformBundle\Entity\Advert
+        // ou null si l'id $id  n'existe pas, d'où ce if :
+        if (null === $advert) {
+            throw new NotFoundHttpException("L'annonce d'id ".$id." n'existe pas.");
+        }
+        // Le render ne change pas, on passait avant un tableau, maintenant un objet
 
         return $this->render('OCPlatformBundle:Advert:view.html.twig', array(
-
             'advert' => $advert
-
         ));
-
     }
 
     public function addAction(Request $request)
@@ -105,6 +93,36 @@ class AdvertController extends Controller
 
         }
 
+        // Création de l'entité
+        $advert = new Advert();
+        $advert->setTitle('Recherche développeur Symfony.');
+        $advert->setAuthor('Alexandre');
+        $advert->setContent("Nous recherchons un développeur Symfony débutant sur Lyon. Blabla…");
+        // On peut ne pas définir ni la date ni la publication,
+        // car ces attributs sont définis automatiquement dans le constructeur
+
+        // Création de l'entité Image
+
+        $image = new Image();
+        $image->setUrl('http://sdz-upload.s3.amazonaws.com/prod/upload/job-de-reve.jpg');
+        $image->setAlt('Job de rêve');
+
+        // On lie l'image à l'annonce
+        $advert->setImage($image);
+
+        // On récupère l'EntityManager
+        $em = $this->getDoctrine()->getManager();
+
+        // Étape 1 : On « persiste » l'entité
+        $em->persist($advert);
+
+        // Étape 1 bis : si on n'avait pas défini le cascade={"persist"},
+        // on devrait persister à la main l'entité $image
+        // $em->persist($image);
+
+        // Étape 2 : On déclenche l'enregistrement
+
+        $em->flush();
         // La gestion d'un formulaire est particulière, mais l'idée est la suivante :
 
         // Si la requête est en POST, c'est que le visiteur a soumis le formulaire
@@ -140,5 +158,29 @@ class AdvertController extends Controller
         // Ici, on récupérera l'annonce correspondant à $id
         // Ici, on gérera la suppression de l'annonce en question
         return $this->render('OCPlatformBundle:Advert:delete.html.twig');
+    }
+
+    public function getAdvertWithApplications()
+    {
+        $qb = $this
+            ->createQueryBuilder('a')
+            ->leftJoin('a.applications', 'app')
+            ->addSelect('app')
+        ;
+
+        return $qb
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+
+    public function myFindDQL($id)
+    {
+        $query = $this->_em->createQuery('SELECT a FROM OCPlatformBundle:Advert a WHERE a.id = :id');
+
+        $query->setParameter('id', $id);
+
+        // Utilisation de getSingleResult car la requête ne doit retourner qu'un seul résultat
+        return $query->getSingleResult();
     }
 }

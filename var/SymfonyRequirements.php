@@ -423,7 +423,7 @@ class SymfonyRequirements extends RequirementCollection
                 'Then run "<strong>php composer.phar install</strong>" to install them.'
         );
 
-        $cacheDir = is_dir(__DIR__.'/../var/cache') ? __DIR__.'/../var/cache' : __DIR__.'/cache';
+        $cacheDir = is_dir(__DIR__ . '/../var/cache') ? __DIR__ . '/../var/cache' : __DIR__ . '/cache';
 
         $this->addRequirement(
             is_writable($cacheDir),

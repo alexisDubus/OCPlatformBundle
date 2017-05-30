@@ -13,9 +13,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/",
-            "": "src/", //rajout manuel
-            "PlatformBundle": "src/OC/PlatformBundle" //rajout manuel
+            "Tests\\": "tests/"
         },
         "files": [
             "vendor/symfony/symfony/src/Symfony/Component/VarDumper/Resources/functions/dump.php"
