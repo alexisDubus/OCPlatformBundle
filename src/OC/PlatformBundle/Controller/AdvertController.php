@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use OC\PlatformBundle\Entity\Advert;
 use OC\PlatformBundle\Entity\Image;
+use Doctrine\ORM\EntityRepository;
 
 class AdvertController extends Controller
 {
@@ -157,30 +158,31 @@ class AdvertController extends Controller
     {
         // Ici, on récupérera l'annonce correspondant à $id
         // Ici, on gérera la suppression de l'annonce en question
-        return $this->render('OCPlatformBundle:Advert:delete.html.twig');
+        return $this->render('OCPlatformBundle:Advert:delete.html.twig', array(
+            'id' => $id
+        ) );
     }
 
-    public function getAdvertWithApplications()
+    public function getAdvertWithCategories(array $categoryNames)
     {
-        $qb = $this
-            ->createQueryBuilder('a')
-            ->leftJoin('a.applications', 'app')
-            ->addSelect('app')
+        $qb = $this->createQueryBuilder('a');
+
+        // On fait une jointure avec l'entité Category avec pour alias « c »
+        $qb
+            ->innerJoin('a.categories', 'c')
+            ->addSelect('c')
         ;
 
+        // Puis on filtre sur le nom des catégories à l'aide d'un IN
+        $qb->where($qb->expr()->in('c.name', $categoryNames));
+        // La syntaxe du IN et d'autres expressions se trouve dans la documentation Doctrine
+
+        // Enfin, on retourne le résultat
         return $qb
             ->getQuery()
             ->getResult()
             ;
     }
 
-    public function myFindDQL($id)
-    {
-        $query = $this->_em->createQuery('SELECT a FROM OCPlatformBundle:Advert a WHERE a.id = :id');
 
-        $query->setParameter('id', $id);
-
-        // Utilisation de getSingleResult car la requête ne doit retourner qu'un seul résultat
-        return $query->getSingleResult();
-    }
 }
