@@ -136,52 +136,54 @@ class AdvertController extends Controller
             return $this->redirectToRoute('oc_platform_view', array('id' => 5));
         }
         // Si on n'est pas en POST, alors on affiche le formulaire
-        return $this->render('OCPlatformBundle:Advert:add.html.twig');
+        return $this->render('OCPlatformBundle:Advert:add.html.twig', array(
+            'advert' => $advert
+        ));
     }
 
     public function editAction($id, Request $request)
     {
-        $advert = array(
-            'title'   => 'Recherche développpeur Symfony',
-            'id'      => $id,
-            'author'  => 'Alexandre',
-            'content' => 'Nous recherchons un développeur Symfony débutant sur Lyon. Blabla…',
-            'date'    => new \Datetime()
-        );
+        $advert = $this
+            ->getDoctrine()
+            ->getManager()
+            ->getRepository('OCPlatformBundle:Advert')
+            ->myFindDQL($id)
+        ;
 
-        return $this->render('OCPlatformBundle:Advert:edit.html.twig', array(
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($advert);
+        $em->flush();
+
+
+        return $this->render('OCPlatformBundle:Advert:edit2.html.twig', array(
             'advert' => $advert
         ));
     }
 
     public function deleteAction($id)
     {
+     /*   $advert = $this
+            ->getDoctrine()
+            ->getManager()
+            ->getRepository('OCPlatformBundle:Advert')
+            ->myFindDQL($id)
+        ; */
+        $advert = $this
+            ->getDoctrine()
+            ->getManager()
+            ->getRepository('OCPlatformBundle:Advert')
+            ->myFindDQL($id)
+        ;
+
+
         // Ici, on récupérera l'annonce correspondant à $id
         // Ici, on gérera la suppression de l'annonce en question
         return $this->render('OCPlatformBundle:Advert:delete.html.twig', array(
-            'id' => $id
+            'id' => $advert->getId(),
+            'title' => $advert->getTitle(),
+            'content'=> $advert->getContent(),
         ) );
-    }
-
-    public function getAdvertWithCategories(array $categoryNames)
-    {
-        $qb = $this->createQueryBuilder('a');
-
-        // On fait une jointure avec l'entité Category avec pour alias « c »
-        $qb
-            ->innerJoin('a.categories', 'c')
-            ->addSelect('c')
-        ;
-
-        // Puis on filtre sur le nom des catégories à l'aide d'un IN
-        $qb->where($qb->expr()->in('c.name', $categoryNames));
-        // La syntaxe du IN et d'autres expressions se trouve dans la documentation Doctrine
-
-        // Enfin, on retourne le résultat
-        return $qb
-            ->getQuery()
-            ->getResult()
-            ;
     }
 
 

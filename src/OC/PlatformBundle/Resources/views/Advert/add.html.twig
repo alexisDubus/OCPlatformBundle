@@ -12,5 +12,10 @@
 		Attention : cette annonce sera ajoutée directement
 		sur la page d'accueil après validation du formulaire.
 	</p>
+	<p>
+		<a href="{{ path('oc_platform_view', {'id': advert.id}, {'title': advert.title}) }}" class="btn btn-default">
+			<i class="glyphicon glyphicon-chevron-left"></i>Retour à l'annonce
+		</a>
+	</p>
 
 {% endblock %}

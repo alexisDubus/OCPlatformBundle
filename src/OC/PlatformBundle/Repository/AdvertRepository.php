@@ -47,6 +47,15 @@ class AdvertRepository extends \Doctrine\ORM\EntityRepository
         return $query->getSingleResult();
     }
 
+    public function deleteByDQL($id)
+    {
+        $query = $this->_em->createQuery('DELETE a FROM OCPlatformBundle:Advert a WHERE a.id = :id');
+        $query->setParameter('id', $id);
+
+        // Utilisation de getSingleResult car la requête ne doit retourner qu'un seul résultat
+        $query->execute();
+    }
+
     public function myFind()
     {
         $qb = $this->createQueryBuilder('a');
@@ -92,5 +101,5 @@ class AdvertRepository extends \Doctrine\ORM\EntityRepository
             ->getResult()
             ;
     }
-    
+
 }
