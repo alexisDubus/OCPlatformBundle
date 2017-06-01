@@ -46,6 +46,18 @@ class Advert
     private $date;
 
     /**
+     * @ORM\ManyToMany(targetEntity="OC\PlatformBundle\Entity\Category", cascade={"persist"})
+     * @ORM\JoinTable(name="oc_advert_category")
+     */
+
+    private $categories;
+    /**
+     * @ORM\OneToMany(targetEntity="OC\PlatformBundle\Entity\Application", mappedBy="advert")
+     */
+
+    private $applications; // Notez le « s », une annonce est liée à plusieurs candidatures
+
+    /**
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
@@ -66,14 +78,47 @@ class Advert
      */
     private $content;
 
-    public function __construct()
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="nb_applications", type="integer")
+     */
+    private $nbApplications = 0;
 
+    /**
+     * @return int
+     */
+    public function getNbApplications()
     {
+        return $this->nbApplications;
+    }
 
+    /**
+     * @param int $nbApplications
+     */
+    public function setNbApplications($nbApplications)
+    {
+        $this->nbApplications = $nbApplications;
+        return $this;
+    }
+
+
+    public function __construct()
+    {
         // Par défaut, la date de l'annonce est la date d'aujourd'hui
 
         $this->date = new \Datetime();
+    }
 
+    public function increaseApplication()
+    {
+        $this->nbApplications++;
+    }
+
+
+    public function decreaseApplication()
+    {
+        $this->nbApplications--;
     }
 
     /**
@@ -241,5 +286,73 @@ class Advert
     public function getImage()
     {
         return $this->image;
+    }
+
+    /**
+     * Add category
+     *
+     * @param \OC\PlatformBundle\Entity\Category $category
+     *
+     * @return Advert
+     */
+    public function addCategory(\OC\PlatformBundle\Entity\Category $category)
+    {
+        $this->categories[] = $category;
+
+        return $this;
+    }
+
+    /**
+     * Remove category
+     *
+     * @param \OC\PlatformBundle\Entity\Category $category
+     */
+    public function removeCategory(\OC\PlatformBundle\Entity\Category $category)
+    {
+        $this->categories->removeElement($category);
+    }
+
+    /**
+     * Get categories
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCategories()
+    {
+        return $this->categories;
+    }
+
+    /**
+     * Add application
+     *
+     * @param \OC\PlatformBundle\Entity\Application $application
+     *
+     * @return Advert
+     */
+    public function addApplication(\OC\PlatformBundle\Entity\Application $application)
+    {
+        $this->applications[] = $application;
+
+        return $this;
+    }
+
+    /**
+     * Remove application
+     *
+     * @param \OC\PlatformBundle\Entity\Application $application
+     */
+    public function removeApplication(\OC\PlatformBundle\Entity\Application $application)
+    {
+        $this->applications->removeElement($application);
+    }
+
+    /**
+     * Get applications
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getApplications()
+    {
+        return $this->applications;
     }
 }
