@@ -10,14 +10,18 @@
 
 	<h2>Liste des annonces</h2>
 
-	<ul>
+	<ul class="nav nav-pills ">
         {% for advert in listAdverts %}
 			<li>
 				<a href="{{ path('oc_platform_view', {'id': advert.id}) }}">
                     {{ advert.title }}
 				</a>
-				par {{ advert.author }},
-				le {{ advert.date|date('d/m/Y') }}
+				<p style="position: relative;
+						display: block;
+						padding: 10px 15px;">
+					par {{ advert.author }},
+					le {{ advert.date|date('d/m/Y') }}
+				</p>
 			</li>
         {% else %}
 			<li>Pas (encore !) d'annonces</li>
