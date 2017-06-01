@@ -4,6 +4,7 @@ namespace OC\PlatformBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use OC\PlatformBundle\Entity\Image;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Advert
@@ -99,15 +100,16 @@ class Advert
     public function setNbApplications($nbApplications)
     {
         $this->nbApplications = $nbApplications;
-        return $this;
     }
 
 
     public function __construct()
     {
-        // Par défaut, la date de l'annonce est la date d'aujourd'hui
+        $this->date         = new \Datetime();
 
-        $this->date = new \Datetime();
+        $this->categories   = new ArrayCollection();
+
+        $this->applications = new ArrayCollection();
     }
 
     public function increaseApplication()
@@ -150,7 +152,6 @@ class Advert
     {
         $this->date = $date;
 
-        return $this;
     }
 
     /**
@@ -174,7 +175,6 @@ class Advert
     {
         $this->title = $title;
 
-        return $this;
     }
 
     /**
@@ -197,8 +197,6 @@ class Advert
     public function setAuthor($author)
     {
         $this->author = $author;
-
-        return $this;
     }
 
     /**
@@ -222,7 +220,6 @@ class Advert
     {
         $this->content = $content;
 
-        return $this;
     }
 
     /**
@@ -234,13 +231,11 @@ class Advert
     }
 
     /**
-     * @param mixed $updatedAt
-     * @return Advert
+     * @param \DateTime $updatedAt
      */
-    public function setUpdatedAt($updatedAt)
+    public function setUpdatedAt(\Datetime $updatedAt = null)
     {
         $this->updatedAt = $updatedAt;
-        return $this;
     }
 
     /**
@@ -263,8 +258,6 @@ class Advert
     public function setPublished($published)
     {
         $this->published = $published;
-
-        return $this;
     }
 
     /**
@@ -298,8 +291,6 @@ class Advert
     public function addCategory(\OC\PlatformBundle\Entity\Category $category)
     {
         $this->categories[] = $category;
-
-        return $this;
     }
 
     /**
@@ -333,7 +324,7 @@ class Advert
     {
         $this->applications[] = $application;
 
-        return $this;
+        $application->setAdvert($this);
     }
 
     /**
